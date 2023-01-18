@@ -6,11 +6,7 @@ def isBalanced(n, x):
     #Looping over the input characters
     for i in range (half+1):
         #Condition to check if the bairs of brackets meets the criteria
-        if x[i] in first and x[l] in first:
-            counter += 1
-        elif x[i] in second and x[l] in second:
-            counter += 1
-        elif x[i] in third and x[l] in third:
+        if (x[i] in first and x[l] in first) or (x[i] in second and x[l] in second) or (x[i] in third and x[l] in third):
             counter += 1
         else:
             break
