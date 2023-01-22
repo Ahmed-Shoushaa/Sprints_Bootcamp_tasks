@@ -1,16 +1,17 @@
 import csv
 from datetime import date
-import os
+import os #used it to check for file existence in system
 
-today = date.today()
-filename = "ContactBook_" + str(today) + ".csv"
-header = ["UserName", "Email", "Phone Numbers", "Address", "Insertion Date"]
+today = date.today()                              #getting today date in the format year-month-day
+filename = "ContactBook_" + str(today) + ".csv"   #create file name in the desired format
+header = ["UserName", "Email", "Phone Numbers", "Address", "Insertion Date"]  #csv file header
 
 #Make sure the user input is in the right format
 def input_in_valid_format():
     while True:
         x = input()
         added_line = x.split(",")
+        # check if the user inputed four elements and a valid email and a valid phone number
         if len(added_line) == 4 and added_line[1].__contains__("@") and added_line[2].isdigit() == True:
             break
         else:
@@ -19,33 +20,34 @@ def input_in_valid_format():
                   "\n2-Email(must contain @ symbol)"
                   "\n3-Phone Number(must contain numbers only)"
                   "\n4-Address(can contain any character)\n.........\nTry Again\n.....")
+    #adding the Insertion date automatically to the user input
     added_line.append(str(today))
     return added_line
 
+#checkk if there is a contact book created with today's date
 def todays_file_exist():
-    # Specify file
-    file = filename
     #Return true or false depends on file existance
-    isExist = os.path.exists(file)
+    isExist = os.path.exists(filename)
     if isExist == True:
-        print(file)
+        print(filename)
         print("==========================")
         pass
     else:
         print("There is no Contact Book with today's date")
+        #Create the file if it wasn't created
         with open(filename, 'a', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(header)
-        print(file,"is Created")
+        print(filename,"is Created")
+
 #show a list of users in the csv file (first column)
 def list_of_users_in_csvFile(file):  #Function to list all the users in file
-    names = []
+    names = []  #create empty list to add the users names in it
     with open(file, 'r') as ff:
-
         read = csv.reader(ff)
-        next(read)
+        next(read)  #skip the header row
         for row in read:
-            names.append(row[0])
+            names.append(row[0])   #add the first element in each row(User Names) to the names list
     return names
 
 #Welcome function to let the user decide what command he wants to do with the app
@@ -53,7 +55,7 @@ def welcome():
     print("WELCOME BACK TO YOUR CONTACT BOOK\n=================================")
     print("What do you need to do?\n.......................")
     print("1-Create New Contact\n2-Update Old Contact\n3-Delete a Contact\n4-Backup Contact Book\n5-Show Contact Book")
-    cmd = input("Enter Command Number:")
+    cmd = input("Enter Command Number:")  #user command number input
     print("=====================")
     return cmd
 
@@ -70,15 +72,16 @@ def cases(cmd_num):
         delete()
     elif cmd_num == "4":
         print("BACKUP CONTACT BOOK\n~~~~~~~~~~~~~~~~~~~")
-        backup(filename,"ahmedadelelsayed")
-
+        backup(filename,"ahmedadelelsayed")  #had a problem running exe file when importing boto3 at the begining of the main file
     elif cmd_num == "5":
         show()
     else:
         print("You Enterd Wrong Command Number")
 
+#creatin contacts either manually or importing it from a file
 def create():
     print("How do you want to add data?\n...........................\n1-Add manually\n2-Add from file")
+    #let the user choose manual data entry or importing
     a = input("ENTER COMMAND NUMBER:")
     #Condition 1 for manual data entry
     if a == "1":
@@ -95,6 +98,7 @@ def create():
     elif a == "2":
         print(".....................\nIMPORT DATA FROM FILE\n.....................")
         file = input("Enter File Name with it's extension:")
+        #check whether the user enterd an existing file or not
         try:
             # open the imported file in read mode and the original file in write mode then loop over imported file rows and add to the original one
             data =[]
@@ -120,8 +124,8 @@ def create():
     return filename
 
 def update():
-    updatedlist =[]
-    index_counter = 0
+    updatedlist =[]  #empty list to add the updated line to
+    index_counter = 0  # used it to detect which row the user we want to update in
     #This function prints user names in the csv file
     users_list = list_of_users_in_csvFile(filename)
     print("CONTACTS:",users_list)
@@ -135,7 +139,7 @@ def update():
     print("Enter your updated data in CSV format\nUserName,Email,Number,Address,(the insertion date will be added automatically)")
     #x = input() + ',' + str(today)  #updated contact in csv format
     updated_row = input_in_valid_format()      #turn it into a list to add to file easily
-    #For function to get the upsated row index as i
+    #For function to get the updated row index as i
     for i in range (len(users_list)):
         if username == users_list[i]:
             break
@@ -180,6 +184,10 @@ def delete():
             Writer.writerows(updatedlist)
             print(username,"Deleted successfully and File has been updated")
 
+###
+###I HAD a PROBLEM IN THIS FUN
+###if i add the boto3 module at the begining of the script the .exe file opens and closes immediately
+###while running the script from pycharm works fine
 def backup(file_name, bucket, object_name=None, folder_name=None):
     from botocore.exceptions import ClientError
     import boto3
@@ -203,9 +211,7 @@ def show():
     print("")
 
 
-
 todays_file_exist()
-
 while True:
     cmd_num = welcome()
     cases(cmd_num)
