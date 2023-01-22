@@ -9,11 +9,15 @@ header = ["UserName", "Email", "Phone Numbers", "Address", "Insertion Date"]  #c
 #Make sure the user input is in the right format
 def input_in_valid_format():
     while True:
-        x = input()
-        added_line = x.split(",")
+        x = input()    #take user input
+        added_line = x.split(",")  #turn user input into a list
         # check if the user inputed four elements and a valid email and a valid phone number
+        #1st condition: entered 4 elements separated with comma:
+        #2nd condition: the second element contains @ as it has to be an email
+        #3rd condition: the third element is all digit as it must be a phone number
         if len(added_line) == 4 and added_line[1].__contains__("@") and added_line[2].isdigit() == True:
             break
+        #if the conditions weren't met show a reminder massege with the right format and lwt the user input again
         else:
             print("Your Input is in the wrong format please re enter 4 elemnts seperated with a comme ',' with no spaces "
                   "\n1-UserName(can contain any character)"
@@ -123,6 +127,7 @@ def create():
         print("You entered wrong command number")
     return filename
 
+#update contact info by letting the user eneter the username and all the new updated info
 def update():
     updatedlist =[]  #empty list to add the updated line to
     index_counter = 0  # used it to detect which row the user we want to update in
@@ -158,6 +163,7 @@ def update():
             Writer.writerows(updatedlist)
             print("File has been updated")
 
+#delete the whole user info by getting only his name from the user
 def delete():
     updatedlist = []
     #This function prints user names in the csv file
@@ -184,10 +190,7 @@ def delete():
             Writer.writerows(updatedlist)
             print(username,"Deleted successfully and File has been updated")
 
-###
-###I HAD a PROBLEM IN THIS FUN
-###if i add the boto3 module at the begining of the script the .exe file opens and closes immediately
-###while running the script from pycharm works fine
+#Backup the contacts book on s3 bucket
 def backup(file_name, bucket, object_name=None, folder_name=None):
     from botocore.exceptions import ClientError
     import boto3
@@ -201,6 +204,7 @@ def backup(file_name, bucket, object_name=None, folder_name=None):
     except ClientError as e:
         print(e)
 
+#show the Contact book
 def show():
     print("SHOWING CONTACTS BOOK\n~~~~~~~~~~~~~~~~~~~~~")
     print(filename,"\n~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -210,8 +214,9 @@ def show():
             print(','.join(item))
     print("")
 
-
+#check if the file exists or not, and create it if it wasn't
 todays_file_exist()
+#repeating the procces untill the user doesn't want any other service
 while True:
     cmd_num = welcome()
     cases(cmd_num)
