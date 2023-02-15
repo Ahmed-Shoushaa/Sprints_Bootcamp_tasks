@@ -1,0 +1,80 @@
+---
+- hosts: localhost
+  become: yes
+  tasks:
+  - name: Update all packages to their latest version
+    apt:
+      name: "*"
+      state: latest
+  - name: install wget 
+    apt:
+      name: wget
+      state: present	
+  - name: install openjdk 1.8
+    apt:
+      name: openjdk-8-jdk
+      state: present
+  - name: creates directory 
+    file:
+      path: /app
+      state: directory
+  - name: create new user "nexus"
+    ansible.builtin.user:
+      name: nexus
+  - name: Download latest nexus
+    ansible.builtin.get_url:
+      url: https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+      dest: /app/nexus.tar.gz
+  # - name: untar nexus.tar.tgz i
+  #   ansible.builtin.unarchive:
+  #     src: /app/nexus.tar.gz
+  #     dest: /app/
+  #     owner: nexus
+  #     group: nexus
+  # - name: Rename file
+  #   command: mv /app/nexus-3.47.1-01 /app/nexus
+  - name: edit run_as_user in nexus config file 
+    ansible.builtin.lineinfile:
+      path: /app/nexus/bin/nexus.rc
+      regexp: '^run_as_user='
+      line: run_as_user="nexus"
+  - name: Creating an empty file
+    file:
+      path: /etc/systemd/system/nexus.service
+      state: touch
+  - name: touch file to add nexus as systemd 
+    ansible.builtin.blockinfile:
+      path: /etc/systemd/system/nexus.service
+      block: |
+        [Unit]
+        Description=nexus service
+        After=network.target
+
+        [Service]
+        Type=forking
+        LimitNOFILE=65536
+        User=nexus
+        Group=nexus
+        ExecStart=/app/nexus/bin/nexus start
+        ExecStop=/app/nexus/bin/nexus stop
+        User=nexus
+        Restart=on-abort
+
+        [Install]
+        WantedBy=multi-user.target
+  - name: Enable services for automatic start
+    service:
+      name: nexus
+      enabled: yes
+  - name: start nexus service
+    ansible.builtin.service:
+      name: nexus
+      state: started
+  # - name: copy files in  nexus-3.47* to dir nexus
+  #   ansible.builtin.copy: 
+  #     src: /app/nexus-3.47.1-01/
+  #     dest: /app/nexus/
+  # - name: Remove old file 
+  #   ansible.builtin.file:
+  #     path: /app/nexus-3.47.1-01
+  #     state: absent
